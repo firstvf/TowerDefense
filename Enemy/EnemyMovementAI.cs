@@ -1,21 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyMovementAI : MonoBehaviour
 {
-    [SerializeField] private GameObject[] _pathPoints;
-    private float _movementSpeed => GetComponent<Enemy>().GetSpeed();
     private Transform _destinationPoint;
+    private Transform _moving;
+    private EnemyHealthBar _healthBar;
+    private GameObject[] _pathPoints;
     private bool _ableToMove = true;
+    private float _movementSpeed;
     private int _pathCount = 0;
-    private EnemyList _enemy;
+
+    private void Awake()
+    {
+        _healthBar = GetComponent<EnemyHealthBar>();
+    }
 
     private void Start()
     {
-        _enemy = GetComponent<EnemyList>();
-        _destinationPoint = _pathPoints[_pathCount].transform;
-        transform.LookAt(_destinationPoint);
+        _moving = gameObject.transform;
+        _movementSpeed = GetComponent<Enemy>().Speed;
     }
 
     private void Update()
@@ -23,25 +26,29 @@ public class EnemyMovementAI : MonoBehaviour
         MoveToDestinationPoint();
     }
 
-    private void OnDestroy()
+    public void SetPathPoints(GameObject[] pathPoints)
     {
-        EnemyList.GetEnemyList().Remove(_enemy);
+        _pathPoints = pathPoints;
+        _destinationPoint = _pathPoints[_pathCount].transform;
+        transform.LookAt(_destinationPoint);
     }
 
     private void MoveToDestinationPoint()
-    {
-        if (transform.position == _destinationPoint.position && _pathCount == _pathPoints.Length)
-        {
-            _ableToMove = false;
-            Destroy(gameObject);
-        }
-
+    {     
         if (_ableToMove && transform.position == _destinationPoint.position)
         {
             _destinationPoint = _pathPoints[_pathCount++].transform;
             transform.LookAt(_destinationPoint);
+            _healthBar.RotationHealthBar();
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, _destinationPoint.position, _movementSpeed * Time.deltaTime);
+        _moving.position = Vector3.MoveTowards(transform.position, _destinationPoint.position, _movementSpeed * Time.deltaTime);
+
+        if (transform.position == _destinationPoint.position && _pathCount == _pathPoints.Length)
+        {
+            _ableToMove = false;
+            EnemyTargetList.RemoveEnemy(gameObject);
+            Destroy(gameObject);
+        }
     }
 }

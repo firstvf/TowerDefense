@@ -4,31 +4,60 @@ using UnityEngine;
 
 public class TowerInstallationPoint : MonoBehaviour
 {
-    [SerializeField] private ShopUI _shopUI;
-    private bool _isPointEmpty;
+    public int TotalTowerCost { get; private set; }
+    public int UpgradeCost { get; private set; }
+    public bool IsPointEmpty { get; private set; }
+    private ShopUI _shopUI;
+    private UpgradeTowerMenu _upgradeUI;
+    private GameObject _currentTower;
 
     private void Start()
     {
-        _isPointEmpty = true;
+        IsPointEmpty = true;
     }
 
-    public bool IsPointEmpty() => _isPointEmpty;    
-
-    public void BuildTower()
+    public void BuildTower(GameObject tower, int money)
     {
-        _isPointEmpty = false;
+        _shopUI.GetComponent<GameData>().BuyTower(money);
+        UpgradeCost = money;
+        _currentTower = tower;
+        IsPointEmpty = false;
+        TotalTowerCost += money;
     }
 
-    public void DestroyTower()
+    public void UpgradeTower(int money)
     {
-        _isPointEmpty = true;
+        UpgradeCost += 5;
+        TotalTowerCost += money;
+    }
+
+    public void SellTower()
+    {
+        _shopUI.GetComponent<GameData>().SellTower(TotalTowerCost);
+        Destroy(_currentTower.gameObject);
+        _currentTower = null;
+        IsPointEmpty = true;
     }
 
     private void OnMouseUpAsButton()
     {
-        Debug.Log(_isPointEmpty);
+        if (_shopUI == null || _upgradeUI == null)
+        {
+            _shopUI = FindObjectOfType<ShopUI>();
+            _upgradeUI = FindObjectOfType<UpgradeTowerMenu>();
+        }
 
-        Debug.Log("open");
-        _shopUI.OpenShopUI(gameObject.transform);
+        if (IsPointEmpty)
+        {
+            if (_upgradeUI.gameObject.activeInHierarchy)
+                _upgradeUI.CloseUpgradeMenu();
+            _shopUI.OpenShopUI(gameObject.transform);
+        }
+        else
+        {
+            if (_shopUI.gameObject.activeInHierarchy)
+                _shopUI.CloseShopUI();
+            _upgradeUI.OpenUpgradeMenu(_currentTower.GetComponentInChildren<Tower>(), this);
+        }
     }
 }

@@ -4,22 +4,24 @@ using UnityEngine;
 
 public class MachineGunTower : Tower
 {
-    [SerializeField] private AudioClip _shootSound;
-    protected override int Damage { get; set; }
-    protected override int AttackRadius { get; set; }
-    protected override float AttackSpeed { get; set; }
-    private AudioSource _audioSource;
+    public override int Damage { get; protected set; }
+    public override float AttackRange { get; protected set; }
+    public override float AttackSpeed { get; protected set; }
 
-    private void Start()
+    protected override void Start()
     {
-        _audioSource = GetComponent<AudioSource>();
-        Damage = 5;
-        AttackRadius = 6;
-        AttackSpeed = 0.4f;
+        base.Start();
+        Damage = 10;
+        AttackRange = 10;
+        AttackSpeed = 0.5f;
     }
 
-    protected override void ShootSound()
+    public override void UpgradeTower()
     {
-        _audioSource.PlayOneShot(_shootSound,0.05f);
+        Damage += 9;
+        if (AttackRange < 20)
+            AttackRange += 0.2f;
+        if (AttackSpeed > 0.35f)
+            AttackSpeed -= 0.05f;
     }
 }

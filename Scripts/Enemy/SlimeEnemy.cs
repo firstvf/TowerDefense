@@ -6,20 +6,15 @@ using UnityEngine.UI;
 public class SlimeEnemy : Enemy
 {
     public override int Health { get; protected set; }
-    public override int Experience { get; protected set; }
-    public override int Money { get; protected set; }
-    public override float Speed { get; protected set; }
-
-    protected override void Awake()
-    {
-        base.Awake();
-        Speed = 2.5f;
-    }
+    protected override int Experience { get; set; }
+    protected override int Money { get; set; }
+    protected override float Speed { get; set; }
 
     private void Start()
     {
         Experience = 1;
         Health = 30;
         Money = 1;
+        Speed = 2.5f;
     }
 }
