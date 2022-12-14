@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public abstract class Enemy : MonoBehaviour
 {
@@ -13,12 +9,10 @@ public abstract class Enemy : MonoBehaviour
     private bool _isDead => Health <= 0;
     private bool _isAbleAnAward = true;
     private EnemyHealthBar _healthBar;
-    private GameData _gameData;
 
     protected virtual void Awake()
     {
         _healthBar = GetComponent<EnemyHealthBar>();
-        _gameData = FindObjectOfType<GameData>();
     }
 
     public bool TakeDamage(int damage)
@@ -43,7 +37,7 @@ public abstract class Enemy : MonoBehaviour
 
     private void GetLoot()
     {
-        _gameData.SetMoney(Money);
-        _gameData.AddScore();
+        GameData.AddMoney(Money);
+        GameData.AddScore();
     }
 }

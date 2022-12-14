@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,14 +6,16 @@ using UnityEngine.UI;
 public class UpgradeTowerMenu : MonoBehaviour
 {
     [SerializeField] private Sprite[] _ranks;
-    [SerializeField] private GameData _gameData;
     [SerializeField] private GameObject _upgradeMenu;
     [SerializeField] private Sprite[] _towerSprite;
     [SerializeField] private TextMeshProUGUI _damage, _range, _attackSpeed, _level, _upgrade, _kills;
     [SerializeField] private Image _rankImage;
-    [SerializeField] private AudioClip _sellTowerSound , _upgradeTowerSound;
+    [SerializeField] private AudioClip _sellTowerSound, _upgradeTowerSound;
     [SerializeField] private GameObject _installationPointIndicator;
     [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private Image _towerImage;
+    [SerializeField] private GameObject _sellWindow;
+    [SerializeField] private TextMeshProUGUI _sellPriceText;
     private WaitForSeconds _time;
     private Coroutine _reloadMenuCoroutine;
     private Tower _tower;
@@ -31,6 +32,8 @@ public class UpgradeTowerMenu : MonoBehaviour
     {
         _installationPointIndicator.transform.position = instPoint.gameObject.transform.position;
         _installationPointIndicator.SetActive(true);
+        _towerImage.sprite = tower.GetTowerSprite();
+
         if (_installationPoint != instPoint || _tower != tower)
         {
             _installationPoint = instPoint;
@@ -42,20 +45,32 @@ public class UpgradeTowerMenu : MonoBehaviour
     }
     public void UpgradeTowerLevel()
     {
-        if (_gameData.Money >= _upgradeCost)
+        if (GameData.Money >= _upgradeCost)
         {
-            _audioSource.PlayOneShot(_upgradeTowerSound);
+            if (!GameData.IsDisableSounds)
+                _audioSource.PlayOneShot(_upgradeTowerSound);
             _installationPoint.UpgradeTower(_upgradeCost);
-            _gameData.UpgradeTower(_upgradeCost);
+            GameData.UpgradeTower(_upgradeCost);
             _tower.UpgradeTower();
             RefreshMenu();
         }
-        else Debug.Log("Not enough money");
+    }
+
+    public void ShowSellPriceWindow()
+    {
+        _sellPriceText.text = _installationPoint.ShowSellPrice().ToString();
+        _sellWindow.SetActive(true);
+    }
+    public void HideSellPriceWindow()
+    {
+        _sellWindow.SetActive(false);
     }
 
     public void SellTower()
     {
-        _audioSource.PlayOneShot(_sellTowerSound);
+        HideSellPriceWindow();
+        if (!GameData.IsDisableSounds)
+            _audioSource.PlayOneShot(_sellTowerSound);
         _installationPoint.SellTower();
         CloseUpgradeMenu();
     }
@@ -95,14 +110,22 @@ public class UpgradeTowerMenu : MonoBehaviour
         _range.text = _tower.AttackRange.ToString("#.#");
         _attackSpeed.text = _tower.AttackSpeed.ToString("#.#");
         _kills.text = _towerExp.KillsCount.ToString();
-        _level.text = _towerExp.Level.ToString();
-        _rankImage.sprite = _ranks[_towerExp.Level];
+        _level.text = (_towerExp.Level + 1).ToString();
+        if (_towerExp.Level < _ranks.Length)
+            _rankImage.sprite = _ranks[_towerExp.Level];
+        else
+            _rankImage.sprite = _ranks[_ranks.Length - 1];
         TextColor();
+    }
+
+    public Sprite GetRankSprite(int level)
+    {
+        return _ranks[level];
     }
 
     private void TextColor()
     {
-        if (_gameData.Money < _upgradeCost)
+        if (GameData.Money < _upgradeCost)
             _upgrade.color = Color.red;
         else _upgrade.color = Color.white;
     }

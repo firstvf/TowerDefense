@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MachineGunTower : Tower
 {
@@ -8,13 +9,16 @@ public class MachineGunTower : Tower
     public override float AttackRange { get; protected set; }
     public override float AttackSpeed { get; protected set; }
 
+    [SerializeField] private Sprite _machineGunSprite;
+
     protected override void Start()
     {
-        base.Start();
         Damage = 10;
         AttackRange = 10;
         AttackSpeed = 0.5f;
+        base.Start();
     }
+    public override Sprite GetTowerSprite() => _machineGunSprite;
 
     public override void UpgradeTower()
     {

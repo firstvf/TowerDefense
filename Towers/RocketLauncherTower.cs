@@ -7,19 +7,24 @@ public class RocketLauncherTower : Tower
     public override int Damage { get; protected set; }
     public override float AttackRange { get; protected set; }
     public override float AttackSpeed { get; protected set; }
+
+    [SerializeField] private Sprite _rocketLauncherSprite;
     private MissilesPooler _missilesPooler;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _missilesPooler = GetComponent<MissilesPooler>();
     }
 
+    public override Sprite GetTowerSprite() => _rocketLauncherSprite;
+
     protected override void Start()
     {
-        base.Start();
-        Damage = 30;
+        Damage = 25;
         AttackRange = 15;
-        AttackSpeed = 4f;
+        AttackSpeed = 3.5f;
+        base.Start();
     }
 
     public override void UpgradeTower()

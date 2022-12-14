@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TowerInstallationPoint : MonoBehaviour
@@ -7,6 +5,7 @@ public class TowerInstallationPoint : MonoBehaviour
     public int TotalTowerCost { get; private set; }
     public int UpgradeCost { get; private set; }
     public bool IsPointEmpty { get; private set; }
+
     private ShopUI _shopUI;
     private UpgradeTowerMenu _upgradeUI;
     private GameObject _currentTower;
@@ -18,7 +17,8 @@ public class TowerInstallationPoint : MonoBehaviour
 
     public void BuildTower(GameObject tower, int money)
     {
-        _shopUI.GetComponent<GameData>().BuyTower(money);
+        tower.GetComponentInChildren<UI_TowerLevelUp>().SetUpgradeMenu(_upgradeUI);
+        GameData.BuyTower(money);
         UpgradeCost = money;
         _currentTower = tower;
         IsPointEmpty = false;
@@ -31,9 +31,11 @@ public class TowerInstallationPoint : MonoBehaviour
         TotalTowerCost += money;
     }
 
+    public int ShowSellPrice() => (int)(TotalTowerCost / 1.5f);
+
     public void SellTower()
     {
-        _shopUI.GetComponent<GameData>().SellTower(TotalTowerCost);
+        GameData.SellTower(TotalTowerCost);
         Destroy(_currentTower.gameObject);
         _currentTower = null;
         IsPointEmpty = true;
@@ -41,21 +43,21 @@ public class TowerInstallationPoint : MonoBehaviour
 
     private void OnMouseUpAsButton()
     {
-        if (_shopUI == null || _upgradeUI == null)
-        {
-            _shopUI = FindObjectOfType<ShopUI>();
-            _upgradeUI = FindObjectOfType<UpgradeTowerMenu>();
-        }
-
         if (IsPointEmpty)
         {
-            if (_upgradeUI.gameObject.activeInHierarchy)
+            if (_shopUI == null)
+            {
+                _shopUI = ShopUI.Instance;
+                _upgradeUI = _shopUI.GetComponent<UpgradeTowerMenu>();
+            }
+
+            if (_upgradeUI.gameObject.activeSelf)
                 _upgradeUI.CloseUpgradeMenu();
             _shopUI.OpenShopUI(gameObject.transform);
         }
         else
         {
-            if (_shopUI.gameObject.activeInHierarchy)
+            if (_shopUI.gameObject.activeSelf)
                 _shopUI.CloseShopUI();
             _upgradeUI.OpenUpgradeMenu(_currentTower.GetComponentInChildren<Tower>(), this);
         }

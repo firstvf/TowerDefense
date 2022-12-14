@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,7 +19,6 @@ public class EnemyHealthBar : MonoBehaviour
     private void Start()
     {
         _mainCamera = Camera.main;
-      //  _enemy = GetComponent<Enemy>();
         _maxHealth = _enemy.Health;
         _text.text = _enemy.Health.ToString();
         RotationHealthBar();
@@ -42,6 +39,6 @@ public class EnemyHealthBar : MonoBehaviour
 
     public void RotationHealthBar()
     {
-        _canvas.transform.LookAt(_mainCamera.transform);
+        _canvas.transform.LookAt(_mainCamera.transform.position);
     }
 }
