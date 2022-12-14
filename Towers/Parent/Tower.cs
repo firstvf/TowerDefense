@@ -1,46 +1,44 @@
 using System.Collections;
 using System.Collections.Generic;
-using System;
 using UnityEngine;
 
 public abstract class Tower : MonoBehaviour
 {
-    //private ParticleSystem _particle => GetComponent<ParticleSystem>();
     abstract public float AttackRange { get; protected set; }
     abstract public float AttackSpeed { get; protected set; }
     abstract public int Damage { get; protected set; }
-    protected GameObject Target;
+
+    private ParticleSystem _particle;
+    protected Enemy Target;
+    private GameObject _targetObject;
     private WaitForSeconds _attackCooldown;
-    private WaitForSeconds _findTargetCooldown;
     private List<GameObject> _enemyList;
     private TowerExperienceSystem _towerExp;
     private AudioSource _audioSource;
     private Coroutine _attackCoroutine;
     private bool _isAbleToFindTarget = true;
     private bool _isCoroutineStart;
+    private Sprite _towerSprite;
 
-    private void Awake()
+    protected virtual void Awake()
     {
+        _particle = GetComponent<ParticleSystem>();
         _towerExp = GetComponent<TowerExperienceSystem>();
         _audioSource = GetComponent<AudioSource>();
     }
     protected virtual void Start()
     {
-        _findTargetCooldown = new WaitForSeconds(.5f);
         _enemyList = EnemyTargetList.GetEnemyList();
-        StartCoroutine(FindTarget());
+        _attackCooldown = new WaitForSeconds(AttackSpeed);
     }
-    private IEnumerator FindTarget()
+    private void Update()
     {
-        while (true)
-        {
-            if (_isAbleToFindTarget)
-                SearchEnemy();
-            else SetTarget();
-
-            yield return _findTargetCooldown;
-        }
+        if (_isAbleToFindTarget)
+            SearchEnemy();
+        else SetTarget();
     }
+
+    public virtual Sprite GetTowerSprite() => _towerSprite;
 
     public void LevelUp(int damage)
     {
@@ -52,15 +50,17 @@ public abstract class Tower : MonoBehaviour
 
     virtual protected void ShootSettings()
     {
-        _audioSource.Play();
-        //  _particle.Play();
+        if (!GameData.IsDisableSounds)
+            _audioSource.Play();
+        if (!GameData.IsDisableParticles)
+            _particle.Play();
         DamageTarget();
     }
 
     virtual protected void DamageTarget()
     {
-        if (Target.GetComponent<Enemy>().TakeDamage(Damage))
-            AddExperience(Target.GetComponent<Enemy>().Experience);
+        if (Target.TakeDamage(Damage))
+            AddExperience(Target.Experience);
     }
 
     private void OnDrawGizmosSelected()
@@ -70,17 +70,18 @@ public abstract class Tower : MonoBehaviour
 
     private void SearchEnemy()
     {
-        foreach (var enemy in _enemyList)
-            if (_isAbleToFindTarget && Vector3.Distance(transform.position, enemy.transform.position) < AttackRange)
+        foreach (var target in _enemyList)
+            if (_isAbleToFindTarget && Vector3.Distance(transform.position, target.transform.position) < AttackRange)
             {
-                Target = enemy.gameObject;
+                Target = target.GetComponent<Enemy>();
+                _targetObject = target;
                 _isAbleToFindTarget = false;
             }
     }
 
     private void SetTarget()
     {
-        if (_enemyList.Contains(Target) && Vector3.Distance(transform.position, Target.transform.position) < AttackRange)
+        if (_enemyList.Contains(_targetObject) && Vector3.Distance(transform.position, Target.transform.position) < AttackRange)
         {
             transform.LookAt(Target.transform.position);
             if (!_isCoroutineStart)
@@ -91,15 +92,12 @@ public abstract class Tower : MonoBehaviour
 
     private IEnumerator ReloadingBetweenAttack()
     {
-        if (_attackCooldown == null)
-            _attackCooldown = new WaitForSeconds(AttackSpeed);
-
         _isCoroutineStart = true;
         while (true)
         {
             if (!_isAbleToFindTarget && Target != null)
                 ShootSettings();
-            else if (_enemyList.Count == 0)
+            else
             {
                 StopCoroutine(_attackCoroutine);
                 _isCoroutineStart = false;

@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -7,6 +6,7 @@ public class RocketMissile : MonoBehaviour
 {
     [SerializeField] private GameObject _rocket;
     [SerializeField] private float _moveSpeed;
+    private ParticleSystem _explosionParticle;
     private WaitForSeconds _timer;
     private Tower _tower;
     private float _explosionRadius;
@@ -18,6 +18,7 @@ public class RocketMissile : MonoBehaviour
 
     private void Awake()
     {
+        _explosionParticle = GetComponent<ParticleSystem>();
         _audioSource = GetComponent<AudioSource>();
     }
 
@@ -56,14 +57,15 @@ public class RocketMissile : MonoBehaviour
         Collider[] colliders = Physics.OverlapSphere(transform.position, _explosionRadius);
 
         foreach (var collider in colliders)
-            if (collider.TryGetComponent(out Enemy enemy))            
+            if (collider.TryGetComponent(out Enemy enemy))
                 if (enemy.TakeDamage(_damage))
-                    _tower.AddExperience(enemy.Experience);            
+                    _tower.AddExperience(enemy.Experience);
     }
 
     private IEnumerator TimeBeforeDestroy()
     {
-        _audioSource.Play();
+        if (!GameData.IsDisableSounds)
+            _audioSource.Play();
         _rocket.SetActive(false);
         yield return _timer;
         _rocket.SetActive(true);
@@ -76,6 +78,8 @@ public class RocketMissile : MonoBehaviour
         transform.LookAt(_desiredPoint);
         if (transform.position == _desiredPoint && _isTargetSet)
         {
+            if (!GameData.IsDisableParticles)
+                _explosionParticle.Play();
             _isTargetSet = false;
             StartCoroutine(TimeBeforeDestroy());
             ExplosionArea();

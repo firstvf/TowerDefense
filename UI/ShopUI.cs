@@ -1,21 +1,25 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using System;
 
 public class ShopUI : MonoBehaviour
 {
+    public static ShopUI Instance;
     [SerializeField] private GameObject _installationPointIndicator;
     [SerializeField] private TextMeshProUGUI[] _towerCost;
     [SerializeField] private AudioClip _buildTowerSound;
     [SerializeField] private GameObject[] _tower;
-    [SerializeField] private GameData _gameData;
     [SerializeField] private GameObject _shop;
     [SerializeField] private AudioSource _audioSource;
     private WaitForSeconds _time;
     private Coroutine _reloadMenuCoroutine;
     private Transform _setPosition;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -40,19 +44,19 @@ public class ShopUI : MonoBehaviour
 
     public void BuyTurretTower()
     {
-        if (_setPosition.GetComponent<TowerInstallationPoint>().IsPointEmpty && _gameData.Money >= 10)
+        if (_setPosition.GetComponent<TowerInstallationPoint>().IsPointEmpty && GameData.Money >= 10)
             SetTowerOnPoint(_tower[0], 10);
     }
 
     public void BuyMachineGunTower()
     {
-        if (_setPosition.GetComponent<TowerInstallationPoint>().IsPointEmpty && _gameData.Money >= 25)
+        if (_setPosition.GetComponent<TowerInstallationPoint>().IsPointEmpty && GameData.Money >= 25)
             SetTowerOnPoint(_tower[1], 25);
     }
 
     public void BuyRocketTower()
     {
-        if (_setPosition.GetComponent<TowerInstallationPoint>().IsPointEmpty && _gameData.Money >= 50)
+        if (_setPosition.GetComponent<TowerInstallationPoint>().IsPointEmpty && GameData.Money >= 50)
             SetTowerOnPoint(_tower[2], 50);
     }
 
@@ -60,7 +64,7 @@ public class ShopUI : MonoBehaviour
     {
         for (int i = 0; i < _towerCost.Length; i++)
         {
-            if (Convert.ToInt32(_towerCost[i].text) > _gameData.Money)
+            if (Convert.ToInt32(_towerCost[i].text) > GameData.Money)
                 _towerCost[i].color = Color.red;
             else _towerCost[i].color = Color.green;
         }
@@ -77,7 +81,8 @@ public class ShopUI : MonoBehaviour
 
     private void SetTowerOnPoint(GameObject tower, int money)
     {
-        _audioSource.PlayOneShot(_buildTowerSound);
+        if (!GameData.IsDisableSounds)
+            _audioSource.PlayOneShot(_buildTowerSound);
         PaintTextIfNotEnoughMoney();
         var towerRef = Instantiate(tower, new Vector3(_setPosition.position.x, _setPosition.position.y + 1, _setPosition.position.z), Quaternion.identity);
         _setPosition.GetComponent<TowerInstallationPoint>().BuildTower(towerRef, money);

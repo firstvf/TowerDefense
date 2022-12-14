@@ -8,13 +8,17 @@ public class TurretTower : Tower
     public override float AttackRange { get; protected set; }
     public override float AttackSpeed { get; protected set; }
 
+    [SerializeField] private Sprite _turretSprite;
+
     protected override void Start()
     {
-        base.Start();
         Damage = 15;
         AttackRange = 12;
         AttackSpeed = 1.5f;
+        base.Start();
     }
+
+    public override Sprite GetTowerSprite() => _turretSprite;    
 
     public override void UpgradeTower()
     {

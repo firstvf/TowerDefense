@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -33,7 +30,7 @@ public class MissilesPooler : MonoBehaviour
         rocket => { rocket.gameObject.SetActive(false); },  // Action on Get
         rocket => { rocket.gameObject.SetActive(false); },  // Action on Release
         rocket => { Destroy(rocket.gameObject); },          // Action on destroy
-        false, _poolSize, _poolSize*2);                       // collection check , pool size , max capacity
+        false, _poolSize, _poolSize * 2);                   // collection check , pool size , max capacity
     }
 
     public void SetMissileInPool(RocketMissile missile)

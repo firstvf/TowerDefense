@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +11,11 @@ public class EnemyTargetList : MonoBehaviour
     {
         if (!_enemyList.Contains(enemy))
             _enemyList.Add(enemy);
+    }
+
+    public static void ClearList()
+    {
+        _enemyList.Clear();
     }
 
     public static void RemoveEnemy(GameObject enemy)
